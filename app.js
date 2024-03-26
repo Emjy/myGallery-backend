@@ -19,6 +19,16 @@ var app = express();
 const cors = require('cors');
 app.use(cors());
 
+// Autoriser des domaines spécifiques
+const corsOptions = {
+    origin: 'https://portfolio-frontend-beryl.vercel.app',
+};
+
+app.use(cors(corsOptions));
+
+app.listen(3000, () => console.log('Server running on port 3000'));
+
+
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
