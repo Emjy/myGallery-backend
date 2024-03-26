@@ -21,7 +21,7 @@ app.use(cors());
 
 // Autoriser des domaines spécifiques
 const corsOptions = {
-    origin: 'https://portfolio-frontend-beryl.vercel.app',
+    origin: 'https://art-papa-frontend.vercel.app',
 };
 
 app.use(cors(corsOptions));
