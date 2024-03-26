@@ -11,40 +11,39 @@ const fs = require("fs");
 const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
 
-const Affiche = require("../models/affiches");
-
-
-
-// Affichage de toutes les affcihes 
+const Tableau = require("../models/tableaux");
+ 
+// Affichage de tous les tableaux 
 
 router.get("/", async (req, res) => {
   try {
-    const affiches = await Affiche.find();
+    const tableaux = await Tableau.find();
 
-    res.json({ result: true, affiches });
+    res.json({ result: true, tableaux });
   } catch (error) {
     res.json({ result: false, error });
   }
 });
 
-// Post an affiche
+// Post a tableau
 
 router.post("/", upload.single('file'), async (req, res) => {
     try {
       const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-        folder: "Affiches",
+        folder: "Tableaux",
       });
   
-      const newAffiche = new Affiche({
+      const newTableau = new Tableau({
         imageName: resultCloudinary.secure_url,
-        filmName: req.body.filmName,
-        realName: req.body.realName,
+        tableauName: req.body.tableauName,
+        auteur: req.body.auteur,
+        prix: req.body.prix,
         creationDate: new Date()
       });
   
-      const affiche = await newAffiche.save();
+      const tableau = await newTableau.save();
       await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
-      res.json({ result: true, affiche });
+      res.json({ result: true, tableau });
   
     } catch (error) {
       console.error('An error occurred:', error);

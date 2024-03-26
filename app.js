@@ -11,6 +11,8 @@ require('./models/connection');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var afficheRouter = require('./routes/affiches');
+var tableauxRouter = require('./routes/tableaux');
+
 
 var app = express();
 
@@ -26,6 +28,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/affiches', afficheRouter)
+app.use('/tableaux', tableauxRouter)
 
 
 module.exports = app;

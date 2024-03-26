@@ -5,6 +5,7 @@ const afficheSchema = mongoose.Schema({
     imageName: String,
     filmName: String,
     realName: String,
+    creationDate: Date,
 
 });
 
