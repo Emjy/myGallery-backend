@@ -21,7 +21,7 @@ app.use(cors());
 
 // Autoriser des domaines spécifiques
 const corsOptions = {
-    origin: 'https://art-papa-frontend.vercel.app',
+    origin: ['https://art-papa-frontend.vercel.app', 'http://localhost:3001'],
 };
 
 app.use(cors(corsOptions));
