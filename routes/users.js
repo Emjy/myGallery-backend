@@ -38,7 +38,7 @@ router.post('/createUser', async (req, res) => {
 });
 
 // Verification user existant pour connexion SignIN
-router.get('/signIn', async (req, res) => {
+router.post('/signIn', async (req, res) => {
 
   try {
     const user = await User.findOne({ user: req.body.user });
