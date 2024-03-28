@@ -30,7 +30,7 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   try {
-    const tableau = await Tableau.findOneByID(req.params.id);
+    const tableau = await Tableau.findOneById(req.params.id);
 
     if (!tableauData) {
       res.json({ result: false, message: "tableau not found" });
