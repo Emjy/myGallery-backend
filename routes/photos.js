@@ -12,7 +12,7 @@ const unlinkAsync = util.promisify(fs.unlink);
 
 const Photo = require("../models/photos");
  
-// Affichage de tous les tableaux 
+// Affichage de toutes les photos 
 
 router.get("/", async (req, res) => {
   try {
