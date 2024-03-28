@@ -6,6 +6,7 @@ const User = require('../models/users');
 const uid2 = require('uid2');
 const bcrypt = require('bcrypt');
 
+// Créer un nouveau user
 router.post('/createUser', async (req, res) => {
   try {
 
@@ -27,7 +28,7 @@ router.post('/createUser', async (req, res) => {
 
     const data = await newUser.save();
 
-    res.json({ result: true, token : data.token, user: data.user });
+    res.json({ result: true, token: data.token, user: data.user });
 
   } catch (error) {
 
@@ -35,5 +36,22 @@ router.post('/createUser', async (req, res) => {
 
   }
 });
+
+// Verification user existant pour connexion SignIN
+router.get('/signIn', async (req, res) => {
+
+  try {
+    const user = await User.findOne({ user: req.body.user });
+
+    if (user && bcrypt.compareSync(req.body.password, user.password)) {
+      res.json({ result: true, token: user.token, userName: user.userName });
+    } else {
+      res.json({ result: false, error: 'Incorrect email or password' });
+    }
+
+  }
+
+})
+
 
 module.exports = router;
