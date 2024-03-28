@@ -44,9 +44,9 @@ router.get('/signIn', async (req, res) => {
     const user = await User.findOne({ user: req.body.user });
 
     if (user && bcrypt.compareSync(req.body.password, user.password)) {
-      res.json({ result: true, token: user.token, userName: user.userName });
+      res.json({ result: true, token: user.token, user: user.user });
     } else {
-      res.json({ result: false, error: 'Incorrect email or password' });
+      res.json({ result: false, error: 'Incorrect user or password' });
     }
 
   } catch (error) {
