@@ -25,6 +25,25 @@ router.get("/", async (req, res) => {
   }
 });
 
+
+// Recupération d'un tableau
+
+router.get("/:id", async (req, res) => {
+  try {
+    const tableau = await Tableau.findOne({ _id: req.params.id });
+
+    if (!tableauData) {
+      res.json({ result: false, message: "tableau not found" });
+      return;
+    } else {
+      res.json({ result: true, tableau });
+    }
+
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 // Post a tableau
 
 router.post("/", upload.single('file'), async (req, res) => {
@@ -38,6 +57,7 @@ router.post("/", upload.single('file'), async (req, res) => {
         tableauName: req.body.tableauName,
         auteur: req.body.auteur,
         prix: req.body.prix,
+        description: req.body.description, 
         creationDate: new Date()
       });
   

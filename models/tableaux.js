@@ -6,6 +6,7 @@ const tableauSchema = mongoose.Schema({
     tableauName: String,
     auteur: String,
     prix: Number, 
+    description: String,
     creationDate: Date,
     
 });
