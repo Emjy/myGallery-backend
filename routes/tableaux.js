@@ -32,7 +32,7 @@ router.get("/:id", async (req, res) => {
   try {
     const tableau = await Tableau.findById(req.params.id);
 
-    if (!tableauData) {
+    if (!tableau) {
       res.json({ result: false, message: "tableau not found" });
       return;
     } else {
