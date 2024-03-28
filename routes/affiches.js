@@ -13,8 +13,6 @@ const unlinkAsync = util.promisify(fs.unlink);
 
 const Affiche = require("../models/affiches");
 
-
-
 // Affichage de toutes les affcihes 
 
 router.get("/", async (req, res) => {
