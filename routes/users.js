@@ -49,6 +49,10 @@ router.get('/signIn', async (req, res) => {
       res.json({ result: false, error: 'Incorrect email or password' });
     }
 
+  } catch (error) {
+
+    res.status(500).json({ result: false, error: 'Erreur serveur' });
+
   }
 
 })
