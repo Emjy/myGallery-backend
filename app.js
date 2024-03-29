@@ -21,8 +21,6 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const cors = require('cors');
-app.use(cors());
-
 
 // Autoriser des domaines spécifiques
 const corsOptions = {
@@ -32,7 +30,6 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 app.listen(3000, () => console.log('Server running on port 3000'));
-
 
 app.use(logger('dev'));
 app.use(express.json());
