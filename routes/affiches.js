@@ -62,11 +62,8 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ result: false, message: "Affiche not found" });
     }
 
-    // Extraire l'ID Cloudinary de l'URL de l'image
-    const imagePublicId = affiche.imageName.split('/').pop().split('.')[0];
-
     // Supprimer l'image de Cloudinary
-    await cloudinary.uploader.destroy(imagePublicId);
+    await cloudinary.uploader.destroy(affiche.idCloud);
 
     // Supprimer l'affiche de la base de données MongoDB
     await Affiche.deleteOne({ _id: afficheId });
