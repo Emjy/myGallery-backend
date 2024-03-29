@@ -35,6 +35,7 @@ router.post("/", upload.single('file'), async (req, res) => {
   
       const newAffiche = new Affiche({
         imageName: resultCloudinary.secure_url,
+        idCloud: resultCloudinary.public_id,
         filmName: req.body.filmName,
         realName: req.body.realName,
         creationDate: new Date()
