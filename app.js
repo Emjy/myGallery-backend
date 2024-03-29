@@ -8,26 +8,24 @@ var logger = require('morgan');
 const mongoose = require('mongoose');
 require('./models/connection');
 
+// Autoriser des domaines spécifiques
+const corsOptions = {
+    origin: ['https://art-papa-frontend.vercel.app', 'http://localhost:3001'],
+};
+
+
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var afficheRouter = require('./routes/affiches');
 var tableauxRouter = require('./routes/tableaux');
 var photosRouter = require('./routes/photos');
 
-
+const cors = require('cors');
+app.use(cors(corsOptions));
 
 var app = express();
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-const cors = require('cors');
-
-// Autoriser des domaines spécifiques
-const corsOptions = {
-    origin: ['https://art-papa-frontend.vercel.app', 'http://localhost:3001'],
-};
-
-app.use(cors(corsOptions));
 
 app.listen(3000, () => console.log('Server running on port 3000'));
 
