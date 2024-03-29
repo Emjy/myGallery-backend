@@ -20,14 +20,15 @@ var afficheRouter = require('./routes/affiches');
 var tableauxRouter = require('./routes/tableaux');
 var photosRouter = require('./routes/photos');
 
+
+var app = express();
+
 const cors = require('cors');
 app.use(cors(corsOptions));
 
-var app = express();
+app.listen(3000, () => console.log('Server running on port 3000'));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-
-app.listen(3000, () => console.log('Server running on port 3000'));
 
 app.use(logger('dev'));
 app.use(express.json());
