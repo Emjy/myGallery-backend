@@ -54,7 +54,7 @@ router.post("/", upload.single('file'), async (req, res) => {
 
 
 // delete une affiche
-router.delete("/:id", async (req, res) => {
+router.post("/:id", async (req, res) => {
   try {
     const afficheId = req.params.id;
     // Trouver l'affiche dans la base de données
