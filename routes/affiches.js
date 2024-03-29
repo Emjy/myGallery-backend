@@ -49,6 +49,34 @@ router.post("/", upload.single('file'), async (req, res) => {
       await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
       res.status(500).json({ result: false, error: error.message });
     }
-  });
+});
+  
+
+// delete une affiche
+router.delete("/:id", async (req, res) => {
+  try {
+    const afficheId = req.params.id;
+    // Trouver l'affiche dans la base de données
+    const affiche = await Affiche.findById(afficheId);
+    if (!affiche) {
+      return res.status(404).json({ result: false, message: "Affiche not found" });
+    }
+
+    // Extraire l'ID Cloudinary de l'URL de l'image
+    const imagePublicId = affiche.imageName.split('/').pop().split('.')[0];
+
+    // Supprimer l'image de Cloudinary
+    await cloudinary.uploader.destroy(imagePublicId);
+
+    // Supprimer l'affiche de la base de données MongoDB
+    await Affiche.deleteOne({ _id: afficheId });
+
+    res.json({ result: true, message: "Affiche deleted successfully" });
+  } catch (error) {
+    console.error('An error occurred:', error);
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 
 module.exports = router;
