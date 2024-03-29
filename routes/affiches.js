@@ -65,10 +65,10 @@ router.delete("/:id", async (req, res) => {
     }
 
     // Supprimer l'image de Cloudinary
-    const result = await await cloudinary.uploader.destroy(affiche.idCloud);
+    const result = await cloudinary.uploader.destroy(affiche.idCloud);
 
     console.log(result)
-    
+
     if (result === 'ok') {
       // Supprimer l'affiche de la base de données MongoDB
       await Affiche.deleteOne({ _id: afficheId });
