@@ -73,11 +73,9 @@ router.post("/:id", async (req, res) => {
     // Supprimer l'image de Cloudinary
     // const result = await cloudinary.uploader.destroy(affiche.idCloud);
 
-    const result = await cloudinary.uploader.destroy(affiche.idCloud, {
-      resource_type: 'image',
-      invalidate: true,
-      sign_url: true
-    });
+    // Change 'sample' to any public ID of your choice
+
+    cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log(result) });
 
     console.log(result)
 
