@@ -77,6 +77,8 @@ router.delete("/:id", async (req, res) => {
 
     // await cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log('result destroy =>', result) });
 
+    console.log(affiche.idCloud)
+
     const result = cloudinary.api
       .delete_resources(affiche.idCloud, { resource_type: 'image' })
       .then(callback);
