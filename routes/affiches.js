@@ -6,6 +6,13 @@ const upload = multer({ dest: '/tmp/uploads' });
 
 //dependances pour upload cloudinary
 const cloudinary = require("cloudinary").v2;
+
+cloudinary.config({
+  cloud_name: 'dzeivdoia',
+  api_key: process.env.API_CLOUDINARY,
+  api_secret: process.env.API_CLOUDINARY_SECRET
+});
+
 const fs = require("fs");
 const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
@@ -64,7 +71,13 @@ router.post("/:id", async (req, res) => {
     }
 
     // Supprimer l'image de Cloudinary
-    const result = await cloudinary.uploader.destroy(affiche.idCloud);
+    // const result = await cloudinary.uploader.destroy(affiche.idCloud);
+
+    const result = await cloudinary.uploader.destroy(affiche.idCloud, {
+      resource_type: 'image',
+      invalidate: true,
+      sign_url: true
+    });
 
     console.log(result)
 
