@@ -75,9 +75,8 @@ router.post("/:id", async (req, res) => {
 
     // Change 'sample' to any public ID of your choice
 
-    cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log(result) });
+    await cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log(result) });
 
-    console.log(result)
 
     if (result == 'ok') {
       // Supprimer l'affiche de la base de données MongoDB
