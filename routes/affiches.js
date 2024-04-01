@@ -72,13 +72,12 @@ router.post("/:id", async (req, res) => {
       return res.status(404).json({ result: false, message: "Affiche not found" });
     }
 
-
-    console.log(affiche.idCloud)
+    const signature = process.env.API_CLOUDINARY_SECRET; 
 
     // Supprimer l'image de Cloudinary
     // const result = await cloudinary.uploader.destroy(affiche.idCloud.charAt(0).toUpperCase() + affiche.idCloud.slice(1));
 
-    const result = cloudinary.uploader.destroy(affiche.idCloud, type = "authenticated")
+    const result = cloudinary.uploader.destroy(affiche.idCloud, signature)
 
     // Change 'sample' to any public ID of your choice
 
