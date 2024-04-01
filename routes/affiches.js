@@ -70,18 +70,17 @@ router.delete("/:id", async (req, res) => {
       return res.status(404).json({ result: false, message: "Affiche not found" });
     }
 
+
+    console.log(affiche.idCloud)
+
     // Supprimer l'image de Cloudinary
-    // const result = await cloudinary.uploader.destroy(affiche.idCloud);
+    const result = await cloudinary.uploader.destroy(affiche.idCloud);
 
     // Change 'sample' to any public ID of your choice
 
     // await cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log('result destroy =>', result) });
 
-    console.log(affiche.idCloud)
 
-    const result = cloudinary.api
-      .delete_resources(affiche.idCloud, { resource_type: 'image' })
-      .then(callback);
 
     if (result == 'ok') {
       // Supprimer l'affiche de la base de données MongoDB
