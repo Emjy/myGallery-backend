@@ -75,7 +75,7 @@ router.post("/:id", async (req, res) => {
 
     // Change 'sample' to any public ID of your choice
 
-    await cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log(result) });
+    await cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log('result destroy =>', result) });
 
 
     if (result == 'ok') {
