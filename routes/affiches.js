@@ -67,25 +67,14 @@ router.post("/:id", async (req, res) => {
     const affiche = await Affiche.findById(afficheId);
     console.log(affiche.idCloud)
 
-
     if (!affiche) {
       return res.status(404).json({ result: false, message: "Affiche not found" });
     }
 
-    const signature = process.env.API_CLOUDINARY_SECRET; 
+    const result = await cloudinary.uploader.destroy(affiche.idCloud)
+    console.log(affiche.idCloud)
 
-    // Supprimer l'image de Cloudinary
-    // const result = await cloudinary.uploader.destroy(affiche.idCloud.charAt(0).toUpperCase() + affiche.idCloud.slice(1));
-
-    const result = cloudinary.uploader.destroy(affiche.idCloud, signature)
-
-    // Change 'sample' to any public ID of your choice
-
-    // await cloudinary.uploader.destroy(affiche.idCloud, function (result) { console.log('result destroy =>', result) });
-
-
-
-    if (result == 'ok') {
+    if (result.result == 'ok') {
       // Supprimer l'affiche de la base de données MongoDB
       await Affiche.deleteOne({ _id: afficheId });
     } else {
