@@ -76,7 +76,7 @@ router.post("/:id", async (req, res) => {
       // Supprimer l'affiche de la base de données MongoDB
       await Affiche.deleteOne({ _id: afficheId });
     } else {
-      res.json({ result: false, message: "Document not found" });
+      return res.json({ result: false, message: "Document not found" });
     }
 
 
