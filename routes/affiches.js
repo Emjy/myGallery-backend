@@ -60,19 +60,17 @@ router.post("/", upload.single('file'), async (req, res) => {
 
 
 // delete une affiche
-router.delete("/:id", async (req, res) => {
+router.post("/:id", async (req, res) => {
   try {
     const afficheId = req.params.id;
     // Trouver l'affiche dans la base de données
     const affiche = await Affiche.findById(afficheId);
-    console.log(affiche.idCloud)
 
     if (!affiche) {
       return res.status(404).json({ result: false, message: "Affiche not found" });
     }
 
-    const result = await cloudinary.uploader.destroy(affiche.idCloud)
-    console.log(affiche.idCloud)
+    const result = await cloudinary.uploader.destroy(affiche.idCloud, { resource_type: 'image' })
 
     if (result.result == 'ok') {
       // Supprimer l'affiche de la base de données MongoDB
