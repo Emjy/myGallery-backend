@@ -76,7 +76,9 @@ router.delete("/:id", async (req, res) => {
     console.log(affiche.idCloud)
 
     // Supprimer l'image de Cloudinary
-    const result = await cloudinary.uploader.destroy(affiche.idCloud.charAt(0).toUpperCase() + affiche.idCloud.slice(1));
+    // const result = await cloudinary.uploader.destroy(affiche.idCloud.charAt(0).toUpperCase() + affiche.idCloud.slice(1));
+
+    const result = cloudinary.uploader.destroy(affiche.idCloud, type = "authenticated")
 
     // Change 'sample' to any public ID of your choice
 
@@ -90,7 +92,7 @@ router.delete("/:id", async (req, res) => {
     } else {
       res.json({ result: false, message: "Document not found" });
     }
-    
+
 
     res.json({ result: true, message: "Affiche deleted successfully" });
   } catch (error) {
