@@ -65,6 +65,8 @@ router.delete("/:id", async (req, res) => {
     const afficheId = req.params.id;
     // Trouver l'affiche dans la base de données
     const affiche = await Affiche.findById(afficheId);
+    console.log(affiche.idCloud)
+
 
     if (!affiche) {
       return res.status(404).json({ result: false, message: "Affiche not found" });
