@@ -68,7 +68,7 @@ router.post("/:id", async (req, res) => {
 
     console.log(result)
 
-    if (result === 'ok') {
+    if (result == 'ok') {
       // Supprimer l'affiche de la base de données MongoDB
       await Affiche.deleteOne({ _id: afficheId });
     } else {
