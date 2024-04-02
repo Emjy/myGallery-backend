@@ -78,7 +78,7 @@ router.post("/:id", async (req, res) => {
   try {
     const tableauId = req.params.id;
     // Trouver l'affiche dans la base de données
-    const tableau = await Tableau.findById(photoId);
+    const tableau = await Tableau.findById(tableauId);
 
     if (!tableau) {
       return res.status(404).json({ result: false, message: "Tableau not found" });
