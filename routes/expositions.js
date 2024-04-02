@@ -35,6 +35,7 @@ router.post("/", upload.single('file'), async (req, res) => {
         const newExpo = new Expo({
             imageCouv: resultCloudinary.secure_url,
             idCloud: resultCloudinary.public_id,
+            expoName: req.body.expoName,
             adresse: req.body.adresse,
             auteur: req.body.auteur,
             startDate: new Date(req.body.startDate),

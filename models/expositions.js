@@ -4,6 +4,7 @@ const expoSchema = mongoose.Schema({
 
     imageCouv: String,
     idCloud: String,
+    expoName: String,
     adresse: String,
     auteur: String,
     startDate: Date,
