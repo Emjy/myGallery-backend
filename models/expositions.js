@@ -15,6 +15,6 @@ const expoSchema = mongoose.Schema({
 
 });
 
-const Expo = mongoose.model('expos', expoSchema);
+const Expo = mongoose.model('expositions', expoSchema);
 
 module.exports = Expo;x

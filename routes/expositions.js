@@ -10,7 +10,7 @@ const fs = require("fs");
 const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
 
-const Expo = require("../models/expos");
+const Expo = require("../models/expositions");
 
 // Affichage de toutes les expos 
 
