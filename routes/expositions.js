@@ -39,7 +39,7 @@ router.post("/", upload.single('file'), async (req, res) => {
             auteur: req.body.auteur,
             startDate: req.body.startDate,
             endDate: req.body.endDate,
-            description: req.body.desc,
+            description: req.body.description,
             creationDate: new Date(),
         });
 

@@ -16,4 +16,4 @@ const expoSchema = mongoose.Schema({
 
 const Expo = mongoose.model('expos', expoSchema);
 
-module.exports = Expo;
+module.exports = Expo;x
