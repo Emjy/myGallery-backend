@@ -54,3 +54,5 @@ router.post("/", upload.single('file'), async (req, res) => {
         res.status(500).json({ result: false, error: error.message });
     }
 });
+
+module.exports = router;
