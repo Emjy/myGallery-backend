@@ -11,7 +11,7 @@ const expoSchema = mongoose.Schema({
     endDate: Date,
     description: String,
     creationDate: Date,
-
+//Test
 
 });
 
