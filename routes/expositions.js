@@ -37,8 +37,8 @@ router.post("/", upload.single('file'), async (req, res) => {
             idCloud: resultCloudinary.public_id,
             adresse: req.body.adresse,
             auteur: req.body.auteur,
-            startDate: req.body.startDate,
-            endDate: req.body.endDate,
+            startDate: new Date(req.body.startDate),
+            endDate: new Date(req.body.endDate),
             description: req.body.description,
             creationDate: new Date(),
         });
