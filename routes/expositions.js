@@ -55,4 +55,32 @@ router.post("/", upload.single('file'), async (req, res) => {
     }
 });
 
+// delete une photo
+router.post("/:id", async (req, res) => {
+    try {
+        const expoId = req.params.id;
+        // Trouver l'affiche dans la base de données
+        const expo = await Expo.findById(expoId);
+
+        if (!expo) {
+            return res.status(404).json({ result: false, message: "Expo not found" });
+        }
+
+        const result = await cloudinary.uploader.destroy(expo.idCloud, { resource_type: 'image' })
+
+        if (result.result == 'ok') {
+            // Supprimer l'affiche de la base de données MongoDB
+            await Expo.deleteOne({ _id: expoId });
+        } else {
+            return res.json({ result: false, message: "Expo not found" });
+        }
+
+
+        res.json({ result: true, message: "Expo deleted successfully" });
+    } catch (error) {
+        console.error('An error occurred:', error);
+        res.status(500).json({ result: false, error: error.message });
+    }
+});
+
 module.exports = router;
