@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const tableauSchema = mongoose.Schema({
 
     imageName: String,
+    idCloud: String,
     tableauName: String,
     auteur: String,
     prix: Number, 

@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const photoSchema = mongoose.Schema({
 
     imageName: String,
+    idCloud: String,
     photoName: String,
     auteur: String,
     prix: Number, 

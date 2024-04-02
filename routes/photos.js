@@ -53,6 +53,7 @@ router.post("/", upload.single('file'), async (req, res) => {
   
       const newPhoto = new Photo({
         imageName: resultCloudinary.secure_url,
+        idCloud: resultCloudinary.public_id,
         photoName: req.body.photoName,
         auteur: req.body.auteur,
         prix: req.body.prix,
@@ -69,6 +70,35 @@ router.post("/", upload.single('file'), async (req, res) => {
       await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
       res.status(500).json({ result: false, error: error.message });
     }
-  });
+});
+  
+
+// delete une photo
+router.post("/:id", async (req, res) => {
+  try {
+    const photoId = req.params.id;
+    // Trouver l'affiche dans la base de données
+    const photo = await Photo.findById(photoId);
+
+    if (!photo) {
+      return res.status(404).json({ result: false, message: "Photo not found" });
+    }
+
+    const result = await cloudinary.uploader.destroy(photo.idCloud, { resource_type: 'image' })
+
+    if (result.result == 'ok') {
+      // Supprimer l'affiche de la base de données MongoDB
+      await Photo.deleteOne({ _id: photoId });
+    } else {
+      return res.json({ result: false, message: "Photo not found" });
+    }
+
+
+    res.json({ result: true, message: "Photo deleted successfully" });
+  } catch (error) {
+    console.error('An error occurred:', error);
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
 
 module.exports = router;

@@ -54,6 +54,7 @@ router.post("/", upload.single('file'), async (req, res) => {
   
       const newTableau = new Tableau({
         imageName: resultCloudinary.secure_url,
+        idCloud: resultCloudinary.public_id,
         tableauName: req.body.tableauName,
         auteur: req.body.auteur,
         prix: req.body.prix,
@@ -70,6 +71,34 @@ router.post("/", upload.single('file'), async (req, res) => {
       await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
       res.status(500).json({ result: false, error: error.message });
     }
-  });
+});
+
+// delete un tableau
+router.post("/:id", async (req, res) => {
+  try {
+    const tableauId = req.params.id;
+    // Trouver l'affiche dans la base de données
+    const tableau = await Tableau.findById(photoId);
+
+    if (!tableau) {
+      return res.status(404).json({ result: false, message: "Tableau not found" });
+    }
+
+    const result = await cloudinary.uploader.destroy(tableau.idCloud, { resource_type: 'image' })
+
+    if (result.result == 'ok') {
+      // Supprimer l'affiche de la base de données MongoDB
+      await Tableau.deleteOne({ _id: tableauId });
+    } else {
+      return res.json({ result: false, message: "Tableau not found" });
+    }
+
+
+    res.json({ result: true, message: "Tableau deleted successfully" });
+  } catch (error) {
+    console.error('An error occurred:', error);
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
 
 module.exports = router;
