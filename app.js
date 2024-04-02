@@ -18,6 +18,8 @@ var usersRouter = require('./routes/users');
 var afficheRouter = require('./routes/affiches');
 var tableauxRouter = require('./routes/tableaux');
 var photosRouter = require('./routes/photos');
+var exposRouter = require('./routes/expos');
+
 
 // Initialisation de l'application express
 var app = express();
@@ -41,6 +43,7 @@ app.use('/users', usersRouter);
 app.use('/affiches', afficheRouter);
 app.use('/tableaux', tableauxRouter);
 app.use('/photos', photosRouter);
+app.use('/expos', exposRouter);
 
 // Lancement du serveur
 app.listen(3000, () => console.log('Server running on port 3000'));
