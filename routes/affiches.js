@@ -65,7 +65,7 @@ router.post("/", upload.single('file'), async (req, res) => {
     // Création d'une nouvelle Affiche avec les données de l'image téléchargée depuis Imgix
     const newAffiche = new Affiche({
       imageName: response.data.url,
-      idCloud: response.data.public_id, // Imgix ne fournit pas de public_id, vérifiez la documentation pour obtenir l'ID approprié
+      idCloud: '', // Imgix ne fournit pas de public_id, vérifiez la documentation pour obtenir l'ID approprié
       filmName: req.body.filmName,
       realName: req.body.realName,
       creationDate: new Date()
