@@ -55,7 +55,9 @@ router.post("/", upload.single('file'), async (req, res) => {
         'Authorization': `Bearer ${accessToken}`,
         ...formData.getHeaders() // Inclure les en-têtes du formulaire
       },
-      body: formData
+      body: formData,
+      duplex: true // Ajouter l'option duplex
+
     });
 
     // Vérification de la réponse de l'API Google Drive
