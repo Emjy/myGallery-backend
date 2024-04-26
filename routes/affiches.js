@@ -47,7 +47,7 @@ router.post("/", upload.single('file'), async (req, res) => {
     // Construction du corps de la requête
     const requestBody = {
       fields: {
-        Name: filmName,
+        Name: req.body.filmName,
         Image: {
           filename: req.file.originalname,
           content_type: req.file.mimetype,
