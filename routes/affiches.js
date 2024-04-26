@@ -59,7 +59,7 @@ router.post("/", upload.single('file'), async (req, res) => {
     // Création d'une nouvelle Affiche avec les données de l'image téléchargée depuis ImgBB
       const newAffiche = new Affiche({
         imageName: response.data.data.url,
-        idCloud: '', 
+        idCloud: response.data.data.filename, 
         filmName: req.body.filmName,
         realName: req.body.realName,
         creationDate: new Date()
