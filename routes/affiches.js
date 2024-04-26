@@ -51,9 +51,8 @@ router.post("/", upload.single('file'), async (req, res) => {
         {
           fields: {
             Name: req.body.filmName,
-            Image: { 
-              url: req.file.path
-            }
+            Image: [{ url: req.file.path }]
+
           }
         }
       ]
