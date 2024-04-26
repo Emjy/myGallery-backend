@@ -53,10 +53,10 @@ router.post("/", upload.single('file'), async (req, res) => {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${accessToken}`,
+        'Content-Type': 'image/jpeg', // Type MIME de l'image JPEG
         ...formData.getHeaders() // Inclure les en-têtes du formulaire
       },
       body: formData,
-      duplex: true // Ajouter l'option duplex
 
     });
 
