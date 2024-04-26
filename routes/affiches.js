@@ -53,7 +53,7 @@ router.post("/", upload.single('file'), async (req, res) => {
       });
 
       const affiche = await newAffiche.save();
-      await unlinkAsync(imagePath);
+      await unlinkAsync(req.file.path);
 
       res.json({ result: true, affiche });
     } else {
@@ -63,6 +63,7 @@ router.post("/", upload.single('file'), async (req, res) => {
   } catch (error) {
     console.error('An error occurred:', error);
     await unlinkAsync(req.file.path); // Suppression du fichier temporaire en cas d'erreur
+
     res.status(500).json({ result: false, error: error.message });
   }
 });
