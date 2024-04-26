@@ -98,17 +98,9 @@ router.post("/:id", async (req, res) => {
     if (!tableau) {
       return res.status(404).json({ result: false, message: "Tableau not found" });
     }
+    await Tableau.deleteOne({ _id: tableauId });
 
-    const result = await cloudinary.uploader.destroy(tableau.idCloud, { resource_type: 'image' })
-
-    if (result.result == 'ok') {
-      // Supprimer l'affiche de la base de données MongoDB
-      await Tableau.deleteOne({ _id: tableauId });
-    } else {
-      return res.json({ result: false, message: "Tableau not found" });
-    }
-
-
+  
     res.json({ result: true, message: "Tableau deleted successfully" });
   } catch (error) {
     console.error('An error occurred:', error);

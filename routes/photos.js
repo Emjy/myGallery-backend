@@ -102,16 +102,8 @@ router.post("/:id", async (req, res) => {
       return res.status(404).json({ result: false, message: "Photo not found" });
     }
 
-    const result = await cloudinary.uploader.destroy(photo.idCloud, { resource_type: 'image' })
-
-    if (result.result == 'ok') {
-      // Supprimer l'affiche de la base de données MongoDB
-      await Photo.deleteOne({ _id: photoId });
-    } else {
-      return res.json({ result: false, message: "Photo not found" });
-    }
-
-
+    await Photo.deleteOne({ _id: photoId });
+  
     res.json({ result: true, message: "Photo deleted successfully" });
   } catch (error) {
     console.error('An error occurred:', error);
