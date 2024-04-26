@@ -54,7 +54,7 @@ router.post("/", upload.single('file'), async (req, res) => {
             Image: {
               filename: req.body.filmName,
               content_type: "image/jpeg",
-              content: base64Image
+              content: req.file.path
             }
           }
         }
