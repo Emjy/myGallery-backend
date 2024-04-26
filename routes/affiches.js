@@ -52,7 +52,7 @@ router.post("/", upload.single('file'), async (req, res) => {
         Image: {
           filename: req.file.originalname,
           content_type: req.file.mimetype,
-          content: req.file.path
+          content: imageData
         }
       }
     };
