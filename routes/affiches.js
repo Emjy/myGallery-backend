@@ -1,21 +1,11 @@
 var express = require("express");
 var router = express.Router();
-const axios = require('axios');
-
 
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/uploads' });
 
 const FormData = require('form-data');
-
-//dependances pour upload cloudinary
-const cloudinary = require("cloudinary").v2;
-
-cloudinary.config({
-  cloud_name: 'dzeivdoia',
-  api_key: process.env.API_CLOUDINARY,
-  api_secret: process.env.API_CLOUDINARY_SECRET
-});
+const axios = require('axios');
 
 const fs = require("fs");
 const util = require("util");
@@ -40,8 +30,7 @@ router.post("/", upload.single('file'), async (req, res) => {
   try {
  
     const apiKey = process.env.API_IMGBB;
-    const imagePath = req.file.path;
-    const imageStream = fs.createReadStream(imagePath);
+    const imageStream = fs.createReadStream(req.file.path);
 
     // Création du payload de la requête POST
     const formData = new FormData();
@@ -53,29 +42,24 @@ router.post("/", upload.single('file'), async (req, res) => {
       headers: formData.getHeaders()
     });
 
-    // Vérification de la réponse et récupération de l'URL de l'image téléchargée
-    if (response.status === 200 && response.data.success) {
+    if (response.data.success) {
 
-    // Création d'une nouvelle Affiche avec les données de l'image téléchargée depuis ImgBB
       const newAffiche = new Affiche({
         imageName: response.data.data.url,
-        idCloud: response.data.data.filename, 
+        idCloud: response.data.delete_url, 
         filmName: req.body.filmName,
         realName: req.body.realName,
         creationDate: new Date()
       });
 
-      // Sauvegarde de la nouvelle Affiche dans la base de données
       const affiche = await newAffiche.save();
-
-      // Suppression du fichier temporaire une fois qu'il a été téléchargé et enregistré
       await unlinkAsync(imagePath);
 
-      // Réponse JSON avec le résultat et les données de l'affiche sauvegardée
       res.json({ result: true, affiche });
     } else {
       throw new Error('Failed to upload image to ImgBB');
     }
+
   } catch (error) {
     console.error('An error occurred:', error);
     await unlinkAsync(req.file.path); // Suppression du fichier temporaire en cas d'erreur
@@ -95,17 +79,10 @@ router.post("/:id", async (req, res) => {
       return res.status(404).json({ result: false, message: "Affiche not found" });
     }
 
-    const result = await cloudinary.uploader.destroy(affiche.idCloud, { resource_type: 'image' })
-
-    if (result.result == 'ok') {
-      // Supprimer l'affiche de la base de données MongoDB
-      await Affiche.deleteOne({ _id: afficheId });
-    } else {
-      return res.json({ result: false, message: "Document not found" });
-    }
-
-
+    await Affiche.deleteOne({ _id: afficheId });
+ 
     res.json({ result: true, message: "Affiche deleted successfully" });
+
   } catch (error) {
     console.error('An error occurred:', error);
     res.status(500).json({ result: false, error: error.message });
