@@ -37,51 +37,51 @@ router.get("/", async (req, res) => {
 router.post("/", upload.single('file'), async (req, res) => {
   try {
 
-    // const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-    //   folder: "Affiches",
-    // });
-
-    // Convertir l'image en base64
-    const imageData = fs.readFileSync(req.file.path);
-    const base64Image = imageData.toString('base64');
-
-    // Construction du corps de la requête
-    const requestBody = {
-      records: [
-        {
-          fields: {
-            Name: req.body.filmName,
-            Image: [{ url: imageData }]
-
-          }
-        }
-      ]
-    } ;
-
-    // Envoi de la requête POST à l'API Airtable
-    const response = await fetch('https://api.airtable.com/v0/appDkyKj8S89iXd0H/affiches', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer patk2i01FftZcO5Yk.49a9294f61bcb729923f2e1f9072721ed3a2101010bc39fdc3c3a3571ae2fbae'
-      },
-      body: JSON.stringify(requestBody)
+    const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
+      folder: "Affiches",
     });
 
-    console.log(response)
-    const responseData = await response.json();
+    // // Convertir l'image en base64
+    // const imageData = fs.readFileSync(req.file.path);
+    // const base64Image = imageData.toString('base64');
+
+    // // Construction du corps de la requête
+    // const requestBody = {
+    //   records: [
+    //     {
+    //       fields: {
+    //         Name: req.body.filmName,
+    //         Image: [{ url: imageData }]
+
+    //       }
+    //     }
+    //   ]
+    // } ;
+
+    // // Envoi de la requête POST à l'API Airtable
+    // const response = await fetch('https://api.airtable.com/v0/appDkyKj8S89iXd0H/affiches', {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'Bearer patk2i01FftZcO5Yk.49a9294f61bcb729923f2e1f9072721ed3a2101010bc39fdc3c3a3571ae2fbae'
+    //   },
+    //   body: JSON.stringify(requestBody)
+    // });
+
+    // console.log(response)
+    // const responseData = await response.json();
 
 
-    // Vérification de la réponse de l'API Airtable
-    if (response.ok) {
-      res.status(200).json({ result: true, message: 'Image stockée avec succès dans Airtable.', data: responseData });
-    } else {
-      res.status(400).json({ result: false, message: 'Erreur lors du stockage de l\'image dans Airtable.', error: responseData });
-    }
+    // // Vérification de la réponse de l'API Airtable
+    // if (response.ok) {
+    //   res.status(200).json({ result: true, message: 'Image stockée avec succès dans Airtable.', data: responseData });
+    // } else {
+    //   res.status(400).json({ result: false, message: 'Erreur lors du stockage de l\'image dans Airtable.', error: responseData });
+    // }
 
     const newAffiche = new Affiche({
-      imageName: '',
-      idCloud: '',
+      imageName: resultCloudinary.secure_url,
+      idCloud: resultCloudinary.public_id,
       filmName: req.body.filmName,
       realName: req.body.realName,
       creationDate: new Date()
