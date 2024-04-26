@@ -34,76 +34,31 @@ router.get("/", async (req, res) => {
 });
 
 // Post an affiche
-
 router.post("/", upload.single('file'), async (req, res) => {
 
   try {
-    // Récupérer le jeton d'accès (bearer token)
-    const accessToken = 'AIzaSyB1Q2xC0qYpWLqh4_D8vYQl1oiV4QtlKbk'; // Remplacez cela par votre propre jeton
 
-    // Construction de l'URL pour l'API de Google Drive
-    const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=media';
-
-    // Création d'un objet FormData et ajout du fichier
-    const formData = new FormData();
-    formData.append('file', fs.createReadStream(req.file.path));
-
-    // Envoi de la requête POST à l'API de Google Drive avec FormData
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${accessToken}`,
-        'Content-Type': 'image/jpeg', // Type MIME de l'image JPEG
-        ...formData.getHeaders() // Inclure les en-têtes du formulaire
-      },
-      body: formData,
-
+    const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
+      folder: "Affiches",
     });
 
-    // Vérification de la réponse de l'API Google Drive
-    if (response.ok) {
-      // Si la requête est réussie, vous pouvez traiter la réponse comme nécessaire
-      const data = await response.json();
-      res.status(200).json({ result: true, message: 'Image stockée avec succès dans Google Drive.', data: data });
-    } else {
-      // Si la requête a échoué, vous pouvez gérer l'erreur en conséquence
-      const errorData = await response.json();
-      res.status(400).json({ result: false, message: 'Erreur lors du stockage de l\'image dans Google Drive.', error: errorData });
-    }
+    const newAffiche = new Affiche({
+      imageName: resultCloudinary.secure_url,
+      idCloud: resultCloudinary.public_id,
+      filmName: req.body.filmName,
+      realName: req.body.realName,
+      creationDate: new Date()
+    });
 
-    // Assurez-vous d'effacer le fichier temporaire après l'envoi
-    await unlinkAsync(req.file.path);
+    const affiche = await newAffiche.save();
+    await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
+    res.json({ result: true, affiche });
 
   } catch (error) {
-    // En cas d'erreur, renvoyez une réponse avec le statut d'erreur et le message d'erreur
     console.error('An error occurred:', error);
-    await unlinkAsync(req.file.path);
+    await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
     res.status(500).json({ result: false, error: error.message });
   }
-
-  // try {
-
-  //   const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-  //     folder: "Affiches",
-  //   });
-
-  //   const newAffiche = new Affiche({
-  //     imageName: resultCloudinary.secure_url,
-  //     idCloud: resultCloudinary.public_id,
-  //     filmName: req.body.filmName,
-  //     realName: req.body.realName,
-  //     creationDate: new Date()
-  //   });
-
-  //   const affiche = await newAffiche.save();
-  //   await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
-  //   res.json({ result: true, affiche });
-
-  // } catch (error) {
-  //   console.error('An error occurred:', error);
-  //   await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
-  //   res.status(500).json({ result: false, error: error.message });
-  // }
 });
 
 
