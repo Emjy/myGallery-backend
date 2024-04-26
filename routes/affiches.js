@@ -55,12 +55,11 @@ router.post("/", upload.single('file'), async (req, res) => {
 
     // Vérification de la réponse et récupération de l'URL de l'image téléchargée
     if (response.status === 200 && response.data.success) {
-      
 
     // Création d'une nouvelle Affiche avec les données de l'image téléchargée depuis ImgBB
       const newAffiche = new Affiche({
         imageName: response.data.data.url,
-        idCloud: response.data.data.id, 
+        idCloud: '', 
         filmName: req.body.filmName,
         realName: req.body.realName,
         creationDate: new Date()
