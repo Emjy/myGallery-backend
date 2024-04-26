@@ -35,67 +35,71 @@ router.get("/", async (req, res) => {
 // Post an affiche
 
 router.post("/", upload.single('file'), async (req, res) => {
+
   try {
+    // Récupérer le jeton d'accès (bearer token)
+    const accessToken = 'AIzaSyB1Q2xC0qYpWLqh4_D8vYQl1oiV4QtlKbk'; // Remplacez cela par votre propre jeton
 
-    const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-      folder: "Affiches",
+    // Construction de l'URL pour l'API de Google Drive
+    const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=media';
+
+    // Construction de l'en-tête Authorization avec le jeton d'accès
+    const headers = {
+      'Authorization': `Bearer ${accessToken}`,
+      'Content-Type': 'image/jpeg' // Assurez-vous que le type de contenu correspond à celui du fichier que vous téléversez
+    };
+
+    // Envoi de la requête POST à l'API de Google Drive avec le contenu du fichier en tant que corps de la requête
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: headers,
+      body: fs.createReadStream(req.file.path)
     });
 
-    // // Convertir l'image en base64
-    // const imageData = fs.readFileSync(req.file.path);
-    // const base64Image = imageData.toString('base64');
+    // Vérification de la réponse de l'API Google Drive
+    if (response.ok) {
+      // Si la requête est réussie, vous pouvez traiter la réponse comme nécessaire
+      const data = await response.json();
+      res.status(200).json({ result: true, message: 'Image stockée avec succès dans Google Drive.', data: data });
+    } else {
+      // Si la requête a échoué, vous pouvez gérer l'erreur en conséquence
+      const errorData = await response.json();
+      res.status(400).json({ result: false, message: 'Erreur lors du stockage de l\'image dans Google Drive.', error: errorData });
+    }
 
-    // // Construction du corps de la requête
-    // const requestBody = {
-    //   records: [
-    //     {
-    //       fields: {
-    //         Name: req.body.filmName,
-    //         Image: [{ url: imageData }]
-
-    //       }
-    //     }
-    //   ]
-    // } ;
-
-    // // Envoi de la requête POST à l'API Airtable
-    // const response = await fetch('https://api.airtable.com/v0/appDkyKj8S89iXd0H/affiches', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer patk2i01FftZcO5Yk.49a9294f61bcb729923f2e1f9072721ed3a2101010bc39fdc3c3a3571ae2fbae'
-    //   },
-    //   body: JSON.stringify(requestBody)
-    // });
-
-    // console.log(response)
-    // const responseData = await response.json();
-
-
-    // // Vérification de la réponse de l'API Airtable
-    // if (response.ok) {
-    //   res.status(200).json({ result: true, message: 'Image stockée avec succès dans Airtable.', data: responseData });
-    // } else {
-    //   res.status(400).json({ result: false, message: 'Erreur lors du stockage de l\'image dans Airtable.', error: responseData });
-    // }
-
-    const newAffiche = new Affiche({
-      imageName: resultCloudinary.secure_url,
-      idCloud: resultCloudinary.public_id,
-      filmName: req.body.filmName,
-      realName: req.body.realName,
-      creationDate: new Date()
-    });
-
-    const affiche = await newAffiche.save();
-    await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
-    res.json({ result: true, affiche });
+    // Assurez-vous d'effacer le fichier temporaire après l'envoi
+    await unlinkAsync(req.file.path);
 
   } catch (error) {
+    // En cas d'erreur, renvoyez une réponse avec le statut d'erreur et le message d'erreur
     console.error('An error occurred:', error);
-    await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
+    await unlinkAsync(req.file.path);
     res.status(500).json({ result: false, error: error.message });
   }
+
+  // try {
+
+  //   const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
+  //     folder: "Affiches",
+  //   });
+
+  //   const newAffiche = new Affiche({
+  //     imageName: resultCloudinary.secure_url,
+  //     idCloud: resultCloudinary.public_id,
+  //     filmName: req.body.filmName,
+  //     realName: req.body.realName,
+  //     creationDate: new Date()
+  //   });
+
+  //   const affiche = await newAffiche.save();
+  //   await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
+  //   res.json({ result: true, affiche });
+
+  // } catch (error) {
+  //   console.error('An error occurred:', error);
+  //   await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
+  //   res.status(500).json({ result: false, error: error.message });
+  // }
 });
 
 
