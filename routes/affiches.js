@@ -57,7 +57,7 @@ router.post("/", upload.single('file'), async (req, res) => {
     };
 
     // Envoi de la requête POST à l'API Airtable
-    const response = await fetch('https://api.airtable.com/v0/appDkyKj8S89iXd0H/affiche', {
+    const response = await fetch('https://api.airtable.com/v0/appDkyKj8S89iXd0H/affiches', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
