@@ -36,6 +36,7 @@ router.get("/", async (req, res) => {
 
 router.post("/", upload.single('file'), async (req, res) => {
   try {
+
     const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
       folder: "Affiches",
     });
@@ -65,6 +66,15 @@ router.post("/", upload.single('file'), async (req, res) => {
       },
       body: JSON.stringify(requestBody)
     });
+
+    console.log(response)
+
+    // Vérification de la réponse de l'API Airtable
+    if (response.ok) {
+      res.status(200).json({ result: true, message: 'Image stockée avec succès dans Airtable.', data: responseData });
+    } else {
+      res.status(400).json({ result: false, message: 'Erreur lors du stockage de l\'image dans Airtable.', error: responseData });
+    }
 
     const newAffiche = new Affiche({
       imageName: resultCloudinary.secure_url,
