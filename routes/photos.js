@@ -4,14 +4,15 @@ var router = express.Router();
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/uploads' });
 
-//dependances pour upload cloudinary
-const cloudinary = require("cloudinary").v2;
+const FormData = require('form-data');
+const axios = require('axios');
+
 const fs = require("fs");
 const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
 
 const Photo = require("../models/photos");
- 
+
 // Affichage de toutes les photos 
 
 router.get("/", async (req, res) => {
@@ -46,32 +47,49 @@ router.get("/:id", async (req, res) => {
 // Post a photo
 
 router.post("/", upload.single('file'), async (req, res) => {
-    try {
-      const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-        folder: "Photos",
-      });
-  
+  try {
+
+    const apiKey = process.env.API_IMGBB;
+    Key = process.env.API_IMGBB;
+    const imageStream = fs.createReadStream(req.file.path);
+
+    // Création du payload de la requête POST
+    const formData = new FormData();
+    formData.append('key', apiKey);
+    formData.append('image', imageStream);
+
+    // Envoi de la requête POST à ImgBB pour télécharger l'image
+    const response = await axios.post("https://api.imgbb.com/1/upload", formData, {
+      headers: formData.getHeaders()
+    });
+
+    if (response.data.success) {
+
       const newPhoto = new Photo({
-        imageName: resultCloudinary.secure_url,
-        idCloud: resultCloudinary.public_id,
+        imageName: response.data.data.url,
+        idCloud: response.data.data.id,
         photoName: req.body.photoName,
         auteur: req.body.auteur,
         prix: req.body.prix,
-        description: req.body.description, 
+        description: req.body.description,
         creationDate: new Date()
       });
-  
+
       const photo = await newPhoto.save();
       await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
       res.json({ result: true, photo });
-  
-    } catch (error) {
-      console.error('An error occurred:', error);
-      await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
-      res.status(500).json({ result: false, error: error.message });
+
+    } else {
+      throw new Error('Failed to upload image to ImgBB');
     }
+
+  } catch (error) {
+    console.error('An error occurred:', error);
+    await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
+    res.status(500).json({ result: false, error: error.message });
+  }
 });
-  
+
 
 // delete une photo
 router.post("/:id", async (req, res) => {

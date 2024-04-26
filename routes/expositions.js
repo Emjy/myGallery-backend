@@ -47,7 +47,7 @@ router.post("/", upload.single('file'), async (req, res) => {
 
         const newExpo = new Expo({
             imageCouv: response.data.data.url,
-            idCloud: response.data.delete_url,
+            idCloud: response.data.data.id,
             expoName: req.body.expoName,
             adresse: req.body.adresse,
             auteur: req.body.auteur,

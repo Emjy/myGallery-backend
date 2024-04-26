@@ -4,9 +4,9 @@ var router = express.Router();
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/uploads' });
 
+const FormData = require('form-data');
+const axios = require('axios');
 
-//dependances pour upload cloudinary
-const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
@@ -47,10 +47,22 @@ router.get("/:id", async (req, res) => {
 // Post a tableau
 
 router.post("/", upload.single('file'), async (req, res) => {
-    try {
-      const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-        folder: "Tableaux",
+  try {
+      
+      const apiKey = process.env.API_IMGBB;
+      const imageStream = fs.createReadStream(req.file.path);
+
+      // Création du payload de la requête POST
+      const formData = new FormData();
+      formData.append('key', apiKey);
+      formData.append('image', imageStream);
+
+      // Envoi de la requête POST à ImgBB pour télécharger l'image
+      const response = await axios.post("https://api.imgbb.com/1/upload", formData, {
+        headers: formData.getHeaders()
       });
+
+      if (response.data.success) {
   
       const newTableau = new Tableau({
         imageName: resultCloudinary.secure_url,
@@ -64,7 +76,10 @@ router.post("/", upload.single('file'), async (req, res) => {
   
       const tableau = await newTableau.save();
       await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
-      res.json({ result: true, tableau });
+        res.json({ result: true, tableau });
+      } else {
+        throw new Error('Failed to upload image to ImgBB');
+      }
   
     } catch (error) {
       console.error('An error occurred:', error);
