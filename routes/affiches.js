@@ -1,9 +1,10 @@
 var express = require("express");
 var router = express.Router();
-const Airtable = require('airtable');
 
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/uploads' });
+
+const FormData = require('form-data');
 
 //dependances pour upload cloudinary
 const cloudinary = require("cloudinary").v2;
@@ -49,11 +50,18 @@ router.post("/", upload.single('file'), async (req, res) => {
       'Content-Type': 'image/jpeg' // Assurez-vous que le type de contenu correspond à celui du fichier que vous téléversez
     };
 
-    // Envoi de la requête POST à l'API de Google Drive avec le contenu du fichier en tant que corps de la requête
+    // Création d'un objet FormData et ajout du fichier
+    const formData = new FormData();
+    formData.append('file', fs.createReadStream(req.file.path));
+
+    // Envoi de la requête POST à l'API de Google Drive avec FormData
     const response = await fetch(url, {
       method: 'POST',
-      headers: headers,
-      body: fs.createReadStream(req.file.path)
+      headers: {
+        'Authorization': `Bearer ${accessToken}`,
+        ...formData.getHeaders() // Inclure les en-têtes du formulaire
+      },
+      body: formData
     });
 
     // Vérification de la réponse de l'API Google Drive
