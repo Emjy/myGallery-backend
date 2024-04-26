@@ -37,9 +37,9 @@ router.get("/", async (req, res) => {
 router.post("/", upload.single('file'), async (req, res) => {
   try {
 
-    const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-      folder: "Affiches",
-    });
+    // const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
+    //   folder: "Affiches",
+    // });
 
     // Convertir l'image en base64
     const imageData = fs.readFileSync(req.file.path);
@@ -51,10 +51,8 @@ router.post("/", upload.single('file'), async (req, res) => {
         {
           fields: {
             Name: req.body.filmName,
-            Image: {
-              filename: req.body.filmName,
-              content_type: "image/jpeg",
-              content: req.file.path
+            Image: { 
+              url: req.file.path
             }
           }
         }
@@ -83,8 +81,8 @@ router.post("/", upload.single('file'), async (req, res) => {
     }
 
     const newAffiche = new Affiche({
-      imageName: resultCloudinary.secure_url,
-      idCloud: resultCloudinary.public_id,
+      imageName: '',
+      idCloud: '',
       filmName: req.body.filmName,
       realName: req.body.realName,
       creationDate: new Date()
