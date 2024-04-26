@@ -65,8 +65,8 @@ router.post("/", upload.single('file'), async (req, res) => {
       if (response.data.success) {
   
       const newTableau = new Tableau({
-        imageName: resultCloudinary.secure_url,
-        idCloud: resultCloudinary.public_id,
+        imageName: response.data.data.url,
+        idCloud: response.data.data.id,
         tableauName: req.body.tableauName,
         auteur: req.body.auteur,
         prix: req.body.prix,
