@@ -68,6 +68,8 @@ router.post("/", upload.single('file'), async (req, res) => {
     });
 
     console.log(response)
+    const responseData = await response.json();
+
 
     // Vérification de la réponse de l'API Airtable
     if (response.ok) {
