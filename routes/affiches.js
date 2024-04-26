@@ -1,6 +1,9 @@
 var express = require("express");
 var router = express.Router();
 
+const axios = require('axios');
+const fs = require('fs');
+
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/uploads' });
 
@@ -35,28 +38,54 @@ router.get("/", async (req, res) => {
 
 // Post an affiche
 router.post("/", upload.single('file'), async (req, res) => {
-
   try {
+    // URL de l'endpoint d'Imgix pour télécharger une image
+    const uploadUrl = "https://api.imgix.com/v4/image";
 
-    const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
-      folder: "Affiches",
+    // Remplacez 'YOUR_API_KEY' par votre clé API Imgix
+    const apiKey = 'ak_2f4f806d28b2fe6ea1408dac52069c37e9356ea7ab4bac4296059816fde3ec7d';
+
+    // Chemin vers l'image téléchargée
+    const imagePath = req.file.path;
+
+    // Lecture de l'image en tant que flux binaire
+    const imageStream = fs.createReadStream(imagePath);
+
+    // Création du payload de la requête POST
+    const formData = new FormData();
+    formData.append('apiKey', apiKey);
+    formData.append('source', imageStream);
+
+    // Envoi de la requête POST à Imgix pour télécharger l'image
+    const response = await axios.post(uploadUrl, formData, {
+      headers: formData.getHeaders()
     });
 
+    // Création d'une nouvelle Affiche avec les données de l'image téléchargée depuis Imgix
     const newAffiche = new Affiche({
-      imageName: resultCloudinary.secure_url,
-      idCloud: resultCloudinary.public_id,
+      imageName: response.data.url,
+      idCloud: response.data.public_id, // Imgix ne fournit pas de public_id, vérifiez la documentation pour obtenir l'ID approprié
       filmName: req.body.filmName,
       realName: req.body.realName,
       creationDate: new Date()
     });
 
+    // Sauvegarde de la nouvelle Affiche dans la base de données
     const affiche = await newAffiche.save();
-    await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
-    res.json({ result: true, affiche });
 
+    // Suppression du fichier temporaire une fois qu'il a été téléchargé et enregistré
+    await unlinkAsync(imagePath);
+
+    // Réponse JSON avec le résultat et les données de l'affiche sauvegardée
+    res.json({ result: true, affiche });
   } catch (error) {
+    // Gestion des erreurs
     console.error('An error occurred:', error);
-    await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
+
+    // Suppression du fichier temporaire en cas d'erreur
+    await unlinkAsync(req.file.path);
+
+    // Réponse d'erreur avec le message d'erreur
     res.status(500).json({ result: false, error: error.message });
   }
 });
