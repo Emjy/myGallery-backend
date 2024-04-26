@@ -1,5 +1,6 @@
 var express = require("express");
 var router = express.Router();
+const Airtable = require('airtable');
 
 const multer = require('multer');
 const upload = multer({ dest: '/tmp/uploads' });
@@ -37,6 +38,32 @@ router.post("/", upload.single('file'), async (req, res) => {
   try {
     const resultCloudinary = await cloudinary.uploader.upload(req.file.path, {
       folder: "Affiches",
+    });
+
+    // Convertir l'image en base64
+    const imageData = fs.readFileSync(req.file.path);
+    const base64Image = imageData.toString('base64');
+
+    // Construction du corps de la requête
+    const requestBody = {
+      fields: {
+        Name: filmName,
+        Image: {
+          filename: req.file.originalname,
+          content_type: req.file.mimetype,
+          content: base64Image
+        }
+      }
+    };
+
+    // Envoi de la requête POST à l'API Airtable
+    const response = await fetch('https://api.airtable.com/v0/appDkyKj8S89iXd0H/affiche', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer patk2i01FftZcO5Yk.49a9294f61bcb729923f2e1f9072721ed3a2101010bc39fdc3c3a3571ae2fbae'
+      },
+      body: JSON.stringify(requestBody)
     });
 
     const newAffiche = new Affiche({
