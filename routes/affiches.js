@@ -43,7 +43,7 @@ router.post("/", upload.single('file'), async (req, res) => {
 
     // Construction de l'URL pour l'API de Google Drive
     const url = 'https://www.googleapis.com/upload/drive/v3/files?uploadType=media';
- 
+
     // Création d'un objet FormData et ajout du fichier
     const formData = new FormData();
     formData.append('file', fs.createReadStream(req.file.path));
