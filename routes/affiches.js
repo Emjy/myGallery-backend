@@ -51,7 +51,7 @@ router.post("/", upload.single('file'), async (req, res) => {
         {
           fields: {
             Name: req.body.filmName,
-            Image: [{ url: base64Image }]
+            Image: [{ url: imageData }]
 
           }
         }
