@@ -52,12 +52,14 @@ router.post("/", upload.single('file'), async (req, res) => {
 
     // Création du payload de la requête POST
     const formData = new FormData();
-    formData.append('apiKey', apiKey);
     formData.append('source', imageStream);
 
-    // Envoi de la requête POST à Imgix pour télécharger l'image
+    // Configuration de la requête POST avec axios
     const response = await axios.post(uploadUrl, formData, {
-      headers: formData.getHeaders()
+      headers: {
+        'Authorization': `Bearer ${apiKey}`,
+        ...formData.getHeaders()
+      }
     });
 
     // Création d'une nouvelle Affiche avec les données de l'image téléchargée depuis Imgix
