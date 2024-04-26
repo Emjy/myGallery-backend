@@ -47,15 +47,19 @@ router.post("/", upload.single('file'), async (req, res) => {
 
     // Construction du corps de la requête
     const requestBody = {
-      fields: {
-        Name: req.body.filmName,
-        Image: {
-          filename: req.body.filmName,
-          content_type: "image/jpeg", 
-          content: base64Image
+      records: [
+        {
+          fields: {
+            Name: req.body.filmName,
+            Image: {
+              filename: req.body.filmName,
+              content_type: "image/jpeg",
+              content: base64Image
+            }
+          }
         }
-      }
-    };
+      ]
+    } ;
 
     // Envoi de la requête POST à l'API Airtable
     const response = await fetch('https://api.airtable.com/v0/appDkyKj8S89iXd0H/affiches', {
