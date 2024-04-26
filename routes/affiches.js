@@ -46,7 +46,7 @@ router.post("/", upload.single('file'), async (req, res) => {
 
       const newAffiche = new Affiche({
         imageName: response.data.data.url,
-        idCloud: response.delete_url, 
+        idCloud: response.data.data.id, 
         filmName: req.body.filmName,
         realName: req.body.realName,
         creationDate: new Date()
