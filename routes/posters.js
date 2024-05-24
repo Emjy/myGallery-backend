@@ -72,17 +72,17 @@ router.post("/", upload.single('file'), async (req, res) => {
 // delete un poster
 router.post("/:id", async (req, res) => {
     try {
-        const afficheId = req.params.id;
-        // Trouver l'affiche dans la base de données
-        const affiche = await Affiche.findById(afficheId);
+        const posterId = req.params.id;
+        // Trouver le poster dans la base de données
+        const poster = await Poster.findById(posterId);
 
-        if (!affiche) {
-            return res.status(404).json({ result: false, message: "Affiche not found" });
+        if (!poster) {
+            return res.status(404).json({ result: false, message: "Poster not found" });
         }
 
-        await Affiche.deleteOne({ _id: afficheId });
+        await Poster.deleteOne({ _id: posterId });
 
-        res.json({ result: true, message: "Affiche deleted successfully" });
+        res.json({ result: true, message: "Poster deleted successfully" });
 
     } catch (error) {
         console.error('An error occurred:', error);
