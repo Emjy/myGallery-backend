@@ -47,7 +47,7 @@ router.post("/", upload.single('file'), async (req, res) => {
             const newPoster = new Poster({
                 imageName: response.data.data.url,
                 idCloud: response.data.data.id,
-                posterName: req.body.filmName,
+                posterName: req.body.posterName,
                 // realName: req.body.realName,
                 creationDate: new Date()
             });
