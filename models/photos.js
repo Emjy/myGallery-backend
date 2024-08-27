@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
-const tableauSchema = mongoose.Schema({
+const photoSchema = mongoose.Schema({
 
     imageName: String,
     idCloud: String,
-    tableauName: String,
+    photoName: String,
     auteur: String,
     prix: Number, 
     description: String,
@@ -12,6 +12,6 @@ const tableauSchema = mongoose.Schema({
     
 });
 
-const Tableau = mongoose.model('tableaux', tableauSchema);
+const Photo = mongoose.model('photos', photoSchema);
 
-module.exports = Tableau;
+module.exports = Photo;
