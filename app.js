@@ -27,7 +27,7 @@ var app = express();
 
 // Configuration de CORS pour autoriser des domaines spécifiques
 const corsOptions = {
-    origin: ['https://art-papa-frontend.vercel.app', 'http://localhost:3001', 'http://françoisgiraud.fr', 'http://gallerie.françoisgiraud.fr'],
+    origin: ['https://art-papa-frontend.vercel.app', 'http://localhost:3001', 'https://françoisgiraud.fr', 'https://gallerie.françoisgiraud.fr', 'https://gallerie.xn--franoisgiraud-lgb.fr/'],
 };
 app.use(cors(corsOptions));
 
