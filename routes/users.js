@@ -1,61 +1,38 @@
-var express = require('express');
-var router = express.Router();
-require('../models/connection');
-
-const User = require('../models/users');
-const uid2 = require('uid2');
+const express = require('express');
+const router = express.Router();
 const bcrypt = require('bcrypt');
+const uid2 = require('uid2');
 
-// Créer un nouveau user
-router.post('/createUser', async (req, res) => {
+const db = require('../db');
+
+router.post('/createUser', (req, res) => {
   try {
+    const existing = db.prepare('SELECT id FROM users WHERE user = ?').get(req.body.user);
+    if (existing) return res.json({ result: false, error: 'Existing user' });
 
-    // Vérification d'un compte déjà existant
-    const existingUser = await User.findOne({ user: req.body.user });
-    if (existingUser) {
-      res.json({ result: false, user: false, error: 'Existing user' });
-      return;
-    }
-
-    // hashage du mot de passe
     const hash = bcrypt.hashSync(req.body.password, 10);
+    const token = uid2(32);
 
-    const newUser = new User({
-      user: req.body.user,
-      password: hash,
-      token: uid2(32),
-    });
+    db.prepare('INSERT INTO users (user, password, token) VALUES (?, ?, ?)').run(req.body.user, hash, token);
 
-    const data = await newUser.save();
-
-    res.json({ result: true, token: data.token, user: data.user });
-
+    res.json({ result: true, token, user: req.body.user });
   } catch (error) {
-
     res.status(500).json({ result: false, error: 'Erreur serveur' });
-
   }
 });
 
-// Verification user existant pour connexion SignIN
-router.post('/signIn', async (req, res) => {
-
+router.post('/signIn', (req, res) => {
   try {
-    const user = await User.findOne({ user: req.body.user });
+    const user = db.prepare('SELECT * FROM users WHERE user = ?').get(req.body.user);
 
     if (user && bcrypt.compareSync(req.body.password, user.password)) {
       res.json({ result: true, token: user.token, user: user.user });
     } else {
       res.json({ result: false, error: 'Incorrect user or password' });
     }
-
   } catch (error) {
-
     res.status(500).json({ result: false, error: 'Erreur serveur' });
-
   }
-
-})
-
+});
 
 module.exports = router;

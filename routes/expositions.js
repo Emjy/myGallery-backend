@@ -1,95 +1,74 @@
-var express = require("express");
-var router = express.Router();
-
+const express = require('express');
+const router = express.Router();
 const multer = require('multer');
+const fs = require('fs');
+const util = require('util');
+
+const db = require('../db');
+const { uploadImage, deleteImage } = require('../lib/cloudinary');
+
 const upload = multer({ dest: '/tmp/uploads' });
-
-const FormData = require('form-data');
-const axios = require('axios');
-
-const fs = require("fs");
-const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
 
-const Expo = require("../models/expositions");
+function toExpo(row) {
+  return {
+    _id: row.id,
+    id: row.id,
+    imageCouv: row.image_couv,
+    idCloud: row.id_cloud,
+    expoName: row.expo_name,
+    adresse: row.adresse,
+    auteur: row.auteur,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    description: row.description,
+    creationDate: row.creation_date,
+  };
+}
 
-// Affichage de toutes les expos 
-
-router.get("/", async (req, res) => {
-    try {
-        const expos = await Expo.find();
-
-        res.json({ result: true, expos });
-    } catch (error) {
-        res.json({ result: false, error });
-    }
+router.get('/', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM expositions ORDER BY creation_date DESC').all();
+    res.json({ result: true, expos: rows.map(toExpo) });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
 });
 
-// Post an expo
+router.post('/', upload.single('file'), async (req, res) => {
+  try {
+    const { url, publicId } = await uploadImage(req.file.path);
+    await unlinkAsync(req.file.path);
 
-router.post("/", upload.single('file'), async (req, res) => {
-    try {
+    const stmt = db.prepare(
+      'INSERT INTO expositions (image_couv, id_cloud, expo_name, adresse, auteur, start_date, end_date, description) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    );
+    const info = stmt.run(
+      url, publicId,
+      req.body.expoName, req.body.adresse, req.body.auteur,
+      req.body.startDate, req.body.endDate, req.body.description
+    );
+    const expo = db.prepare('SELECT * FROM expositions WHERE id = ?').get(info.lastInsertRowid);
 
-        const apiKey = process.env.API_IMGBB;
-        const imageStream = fs.createReadStream(req.file.path);
-
-        // Création du payload de la requête POST
-        const formData = new FormData();
-        formData.append('key', apiKey);
-        formData.append('image', imageStream);
-
-        // Envoi de la requête POST à ImgBB pour télécharger l'image
-        const response = await axios.post("https://api.imgbb.com/1/upload", formData, {
-            headers: formData.getHeaders()
-        });
-
-        if (response.data.success) {
-
-        const newExpo = new Expo({
-            imageCouv: response.data.data.url,
-            idCloud: response.data.data.id,
-            expoName: req.body.expoName,
-            adresse: req.body.adresse,
-            auteur: req.body.auteur,
-            startDate: new Date(req.body.startDate),
-            endDate: new Date(req.body.endDate),
-            description: req.body.description,
-            creationDate: new Date(),
-        });
-
-        const expo = await newExpo.save();
-        await unlinkAsync(req.file.path); // Assurez-vous d'effacer le fichier temporaire
-            res.json({ result: true, expo });
-        } else {
-            throw new Error('Failed to upload image to ImgBB');
-        }
-
-    } catch (error) {
-        console.error('An error occurred:', error);
-        await unlinkAsync(req.file.path); // En cas d'erreur, effacez aussi le fichier
-        res.status(500).json({ result: false, error: error.message });
-    }
+    res.json({ result: true, expo: toExpo(expo) });
+  } catch (error) {
+    if (req.file?.path) await unlinkAsync(req.file.path).catch(() => {});
+    res.status(500).json({ result: false, error: error.message });
+  }
 });
 
-// delete une photo
-router.post("/:id", async (req, res) => {
-    try {
-        const expoId = req.params.id;
-        // Trouver l'affiche dans la base de données
-        const expo = await Expo.findById(expoId);
+router.post('/:id', async (req, res) => {
+  try {
+    const expo = db.prepare('SELECT * FROM expositions WHERE id = ?').get(req.params.id);
+    if (!expo) return res.status(404).json({ result: false, message: 'Expo not found' });
 
-        if (!expo) {
-            return res.status(404).json({ result: false, message: "Expo not found" });
-        }
+    await deleteImage(expo.id_cloud);
+    db.prepare('DELETE FROM expositions WHERE id = ?').run(req.params.id);
 
-        await Expo.deleteOne({ _id: expoId });
-  
-        res.json({ result: true, message: "Expo deleted successfully" });
-
-    } catch (error) {
-        console.error('An error occurred:', error);
-        res.status(500).json({ result: false, error: error.message });
-    }
+    res.json({ result: true, message: 'Expo deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
 });
 
 module.exports = router;

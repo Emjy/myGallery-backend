@@ -1,94 +1,66 @@
-var express = require("express");
-var router = express.Router();
-
+const express = require('express');
+const router = express.Router();
 const multer = require('multer');
+const fs = require('fs');
+const util = require('util');
+
+const db = require('../db');
+const { uploadImage, deleteImage } = require('../lib/cloudinary');
+
 const upload = multer({ dest: '/tmp/uploads' });
-
-const FormData = require('form-data');
-const axios = require('axios');
-
-const fs = require("fs");
-const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
 
-const Affiche = require("../models/affiches");
+function toAffiche(row) {
+  return {
+    _id: row.id,
+    id: row.id,
+    imageName: row.image_name,
+    idCloud: row.id_cloud,
+    filmName: row.film_name,
+    realName: row.real_name,
+    creationDate: row.creation_date,
+  };
+}
 
-// Affichage de toutes les affcihes 
-
-router.get("/", async (req, res) => {
+router.get('/', (req, res) => {
   try {
-    const affiches = await Affiche.find();
-
-    res.json({ result: true, affiches });
+    const rows = db.prepare('SELECT * FROM affiches ORDER BY creation_date DESC').all();
+    res.json({ result: true, affiches: rows.map(toAffiche) });
   } catch (error) {
-    res.json({ result: false, error });
-  }
-});
-
-// Post an affiche
-router.post("/", upload.single('file'), async (req, res) => {
-  try {
- 
-    const apiKey = process.env.API_IMGBB;
-    const imageStream = fs.createReadStream(req.file.path);
-
-    // Création du payload de la requête POST
-    const formData = new FormData();
-    formData.append('key', apiKey);
-    formData.append('image', imageStream);
-
-    // Envoi de la requête POST à ImgBB pour télécharger l'image
-    const response = await axios.post("https://api.imgbb.com/1/upload", formData, {
-      headers: formData.getHeaders()
-    });
-
-    if (response.data.success) {
-
-      const newAffiche = new Affiche({
-        imageName: response.data.data.url,
-        idCloud: response.data.data.id, 
-        filmName: req.body.filmName,
-        realName: req.body.realName,
-        creationDate: new Date()
-      });
-
-      const affiche = await newAffiche.save();
-      await unlinkAsync(req.file.path);
-
-      res.json({ result: true, affiche });
-    } else {
-      throw new Error('Failed to upload image to ImgBB');
-    }
-
-  } catch (error) {
-    console.error('An error occurred:', error);
-    await unlinkAsync(req.file.path); // Suppression du fichier temporaire en cas d'erreur
-
     res.status(500).json({ result: false, error: error.message });
   }
 });
 
-
-// delete une affiche
-router.post("/:id", async (req, res) => {
+router.post('/', upload.single('file'), async (req, res) => {
   try {
-    const afficheId = req.params.id;
-    // Trouver l'affiche dans la base de données
-    const affiche = await Affiche.findById(afficheId);
+    const { url, publicId } = await uploadImage(req.file.path);
+    await unlinkAsync(req.file.path);
 
-    if (!affiche) {
-      return res.status(404).json({ result: false, message: "Affiche not found" });
-    }
+    const stmt = db.prepare(
+      'INSERT INTO affiches (image_name, id_cloud, film_name, real_name) VALUES (?, ?, ?, ?)'
+    );
+    const info = stmt.run(url, publicId, req.body.filmName, req.body.realName);
+    const affiche = db.prepare('SELECT * FROM affiches WHERE id = ?').get(info.lastInsertRowid);
 
-    await Affiche.deleteOne({ _id: afficheId });
- 
-    res.json({ result: true, message: "Affiche deleted successfully" });
-
+    res.json({ result: true, affiche: toAffiche(affiche) });
   } catch (error) {
-    console.error('An error occurred:', error);
+    if (req.file?.path) await unlinkAsync(req.file.path).catch(() => {});
     res.status(500).json({ result: false, error: error.message });
   }
 });
 
+router.post('/:id', async (req, res) => {
+  try {
+    const affiche = db.prepare('SELECT * FROM affiches WHERE id = ?').get(req.params.id);
+    if (!affiche) return res.status(404).json({ result: false, message: 'Affiche not found' });
+
+    await deleteImage(affiche.id_cloud);
+    db.prepare('DELETE FROM affiches WHERE id = ?').run(req.params.id);
+
+    res.json({ result: true, message: 'Affiche deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
 
 module.exports = router;

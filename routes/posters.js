@@ -1,94 +1,65 @@
-var express = require("express");
-var router = express.Router();
-
+const express = require('express');
+const router = express.Router();
 const multer = require('multer');
+const fs = require('fs');
+const util = require('util');
+
+const db = require('../db');
+const { uploadImage, deleteImage } = require('../lib/cloudinary');
+
 const upload = multer({ dest: '/tmp/uploads' });
-
-const FormData = require('form-data');
-const axios = require('axios');
-
-const fs = require("fs");
-const util = require("util");
 const unlinkAsync = util.promisify(fs.unlink);
 
-const Poster = require("../models/posters");
+function toPoster(row) {
+  return {
+    _id: row.id,
+    id: row.id,
+    imageName: row.image_name,
+    idCloud: row.id_cloud,
+    posterName: row.poster_name,
+    creationDate: row.creation_date,
+  };
+}
 
-// Affichage de tous les posters  
-
-router.get("/", async (req, res) => {
-    try {
-        const posters = await Poster.find();
-
-        res.json({ result: true, posters });
-    } catch (error) {
-        res.json({ result: false, error });
-    }
+router.get('/', (req, res) => {
+  try {
+    const rows = db.prepare('SELECT * FROM posters ORDER BY creation_date DESC').all();
+    res.json({ result: true, posters: rows.map(toPoster) });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
 });
 
-// Post an poster
-router.post("/", upload.single('file'), async (req, res) => {
-    try {
+router.post('/', upload.single('file'), async (req, res) => {
+  try {
+    const { url, publicId } = await uploadImage(req.file.path);
+    await unlinkAsync(req.file.path);
 
-        const apiKey = process.env.API_IMGBB;
-        const imageStream = fs.createReadStream(req.file.path);
+    const stmt = db.prepare(
+      'INSERT INTO posters (image_name, id_cloud, poster_name) VALUES (?, ?, ?)'
+    );
+    const info = stmt.run(url, publicId, req.body.posterName);
+    const poster = db.prepare('SELECT * FROM posters WHERE id = ?').get(info.lastInsertRowid);
 
-        // Création du payload de la requête POST
-        const formData = new FormData();
-        formData.append('key', apiKey);
-        formData.append('image', imageStream);
-
-        // Envoi de la requête POST à ImgBB pour télécharger l'image
-        const response = await axios.post("https://api.imgbb.com/1/upload", formData, {
-            headers: formData.getHeaders()
-        });
-
-        if (response.data.success) {
-
-            const newPoster = new Poster({
-                imageName: response.data.data.url,
-                idCloud: response.data.data.id,
-                posterName: req.body.posterName,
-                // realName: req.body.realName,
-                creationDate: new Date()
-            });
-
-            const poster = await newPoster.save();
-            await unlinkAsync(req.file.path);
-
-            res.json({ result: true, poster });
-        } else {
-            throw new Error('Failed to upload image to ImgBB');
-        }
-
-    } catch (error) {
-        console.error('An error occurred:', error);
-        await unlinkAsync(req.file.path); // Suppression du fichier temporaire en cas d'erreur
-
-        res.status(500).json({ result: false, error: error.message });
-    }
+    res.json({ result: true, poster: toPoster(poster) });
+  } catch (error) {
+    if (req.file?.path) await unlinkAsync(req.file.path).catch(() => {});
+    res.status(500).json({ result: false, error: error.message });
+  }
 });
 
+router.post('/:id', async (req, res) => {
+  try {
+    const poster = db.prepare('SELECT * FROM posters WHERE id = ?').get(req.params.id);
+    if (!poster) return res.status(404).json({ result: false, message: 'Poster not found' });
 
-// delete un poster
-router.post("/:id", async (req, res) => {
-    try {
-        const posterId = req.params.id;
-        // Trouver le poster dans la base de données
-        const poster = await Poster.findById(posterId);
+    await deleteImage(poster.id_cloud);
+    db.prepare('DELETE FROM posters WHERE id = ?').run(req.params.id);
 
-        if (!poster) {
-            return res.status(404).json({ result: false, message: "Poster not found" });
-        }
-
-        await Poster.deleteOne({ _id: posterId });
-
-        res.json({ result: true, message: "Poster deleted successfully" });
-
-    } catch (error) {
-        console.error('An error occurred:', error);
-        res.status(500).json({ result: false, error: error.message });
-    }
+    res.json({ result: true, message: 'Poster deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
 });
-
 
 module.exports = router;
