@@ -5,9 +5,14 @@ const fs = require('fs');
 const util = require('util');
 
 const db = require('../db');
+const { requireAuth } = require('../lib/auth');
 const { uploadImage, deleteImage } = require('../lib/cloudinary');
 
-const upload = multer({ dest: '/tmp/uploads' });
+const upload = multer({
+  dest: '/tmp/uploads',
+  limits: { fileSize: 20 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => cb(null, file.mimetype.startsWith('image/')),
+});
 const unlinkAsync = util.promisify(fs.unlink);
 
 function toAffiche(row) {
@@ -31,7 +36,7 @@ router.get('/', (req, res) => {
   }
 });
 
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', requireAuth, upload.single('file'), async (req, res) => {
   try {
     const { url, publicId } = await uploadImage(req.file.path);
     await unlinkAsync(req.file.path);
@@ -49,7 +54,7 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
-router.put('/:id', (req, res) => {
+router.put('/:id', requireAuth, (req, res) => {
   try {
     const { filmName, realName } = req.body;
     db.prepare('UPDATE affiches SET film_name = ?, real_name = ? WHERE id = ?').run(filmName, realName, req.params.id);
@@ -60,7 +65,7 @@ router.put('/:id', (req, res) => {
   }
 });
 
-router.post('/:id', async (req, res) => {
+router.post('/:id', requireAuth, async (req, res) => {
   try {
     const affiche = db.prepare('SELECT * FROM affiches WHERE id = ?').get(req.params.id);
     if (!affiche) return res.status(404).json({ result: false, message: 'Affiche not found' });

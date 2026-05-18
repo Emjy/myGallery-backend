@@ -4,9 +4,20 @@ const bcrypt = require('bcrypt');
 const uid2 = require('uid2');
 
 const db = require('../db');
+const { findUserByToken } = require('../lib/auth');
 
 router.post('/createUser', (req, res) => {
   try {
+    const userCount = db.prepare('SELECT COUNT(*) AS count FROM users').get().count;
+    const canCreateUser = userCount === 0 || process.env.ALLOW_USER_CREATION === 'true' || findUserByToken(req);
+    if (!canCreateUser) {
+      return res.status(403).json({ result: false, error: 'User creation disabled' });
+    }
+
+    if (!req.body.user || !req.body.password) {
+      return res.status(400).json({ result: false, error: 'Missing user or password' });
+    }
+
     const existing = db.prepare('SELECT id FROM users WHERE user = ?').get(req.body.user);
     if (existing) return res.json({ result: false, error: 'Existing user' });
 
