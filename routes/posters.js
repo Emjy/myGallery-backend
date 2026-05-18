@@ -48,6 +48,17 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
+router.put('/:id', (req, res) => {
+  try {
+    const { posterName } = req.body;
+    db.prepare('UPDATE posters SET poster_name = ? WHERE id = ?').run(posterName, req.params.id);
+    const row = db.prepare('SELECT * FROM posters WHERE id = ?').get(req.params.id);
+    res.json({ result: true, poster: toPoster(row) });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 router.post('/:id', async (req, res) => {
   try {
     const poster = db.prepare('SELECT * FROM posters WHERE id = ?').get(req.params.id);

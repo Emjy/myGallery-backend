@@ -57,6 +57,19 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
+router.put('/:id', (req, res) => {
+  try {
+    const { expoName, auteur, adresse, startDate, endDate, description } = req.body;
+    db.prepare(
+      'UPDATE expositions SET expo_name = ?, auteur = ?, adresse = ?, start_date = ?, end_date = ?, description = ? WHERE id = ?'
+    ).run(expoName, auteur, adresse, startDate, endDate, description, req.params.id);
+    const row = db.prepare('SELECT * FROM expositions WHERE id = ?').get(req.params.id);
+    res.json({ result: true, expo: toExpo(row) });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 router.post('/:id', async (req, res) => {
   try {
     const expo = db.prepare('SELECT * FROM expositions WHERE id = ?').get(req.params.id);

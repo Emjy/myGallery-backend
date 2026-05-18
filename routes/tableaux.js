@@ -61,6 +61,19 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
+router.put('/:id', (req, res) => {
+  try {
+    const { tableauName, auteur, prix, description } = req.body;
+    db.prepare(
+      'UPDATE tableaux SET tableau_name = ?, auteur = ?, prix = ?, description = ? WHERE id = ?'
+    ).run(tableauName, auteur, prix, description, req.params.id);
+    const row = db.prepare('SELECT * FROM tableaux WHERE id = ?').get(req.params.id);
+    res.json({ result: true, tableau: toTableau(row) });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 router.post('/:id', async (req, res) => {
   try {
     const tableau = db.prepare('SELECT * FROM tableaux WHERE id = ?').get(req.params.id);

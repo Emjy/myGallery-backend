@@ -49,6 +49,17 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
+router.put('/:id', (req, res) => {
+  try {
+    const { filmName, realName } = req.body;
+    db.prepare('UPDATE affiches SET film_name = ?, real_name = ? WHERE id = ?').run(filmName, realName, req.params.id);
+    const row = db.prepare('SELECT * FROM affiches WHERE id = ?').get(req.params.id);
+    res.json({ result: true, affiche: toAffiche(row) });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 router.post('/:id', async (req, res) => {
   try {
     const affiche = db.prepare('SELECT * FROM affiches WHERE id = ?').get(req.params.id);

@@ -61,6 +61,17 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 });
 
+router.put('/:id', (req, res) => {
+  try {
+    const { photoName, auteur, prix } = req.body;
+    db.prepare('UPDATE photos SET photo_name = ?, auteur = ?, prix = ? WHERE id = ?').run(photoName, auteur, prix, req.params.id);
+    const row = db.prepare('SELECT * FROM photos WHERE id = ?').get(req.params.id);
+    res.json({ result: true, photo: toPhoto(row) });
+  } catch (error) {
+    res.status(500).json({ result: false, error: error.message });
+  }
+});
+
 router.post('/:id', async (req, res) => {
   try {
     const photo = db.prepare('SELECT * FROM photos WHERE id = ?').get(req.params.id);
