@@ -47,7 +47,9 @@ app.use('/tableaux', tableauxRouter);
 app.use('/photos', photosRouter);
 app.use('/expositions', exposistionsRouter);
 
-// Lancement du serveur
-app.listen(3000, () => console.log('Server running on port 3000'));
+// Lancement du serveur (dev uniquement, pas en serverless)
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(3000, () => console.log('Server running on port 3000'));
+}
 
 module.exports = app;
